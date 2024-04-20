@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "- Configuration", "- Configuration", "{E4767BED-E763-409F-B684-E4FA02AAD01E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.globalconfig = .globalconfig
+		Common.props = Common.props
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		NuGet.config = NuGet.config
+		stylecop.json = stylecop.json
+		version.json = version.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "- Dependencies", "- Dependencies", "{D8561343-A286-4CC9-961B-6A284769463B}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "- Documentation", "- Documentation", "{436C553F-9434-430B-9704-7AA75AB58EB0}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		NuGet-README.md = NuGet-README.md
+		README.md = README.md
+		THIRD-PARTY-NOTICES = THIRD-PARTY-NOTICES
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F183A7A3-D4BE-420D-8677-735017E97C70}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Buildvana.Cake", "src\Buildvana.Cake\Buildvana.Cake.msbuildproj", "{6E48C899-E27C-402A-85F9-6279A41A8838}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E48C899-E27C-402A-85F9-6279A41A8838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E48C899-E27C-402A-85F9-6279A41A8838}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E48C899-E27C-402A-85F9-6279A41A8838}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E48C899-E27C-402A-85F9-6279A41A8838}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6E48C899-E27C-402A-85F9-6279A41A8838} = {F183A7A3-D4BE-420D-8677-735017E97C70}
+	EndGlobalSection
+EndGlobal

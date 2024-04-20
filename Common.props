@@ -1,0 +1,43 @@
+<Project>
+
+  <!-- Branding, ownership, licensing, project information -->
+  <PropertyGroup>
+    <Product>Buildvana.Cake</Product>
+    <Authors>Tenacom and contributors</Authors>
+    <Owners>Tenacom</Owners>
+    <Company>Tenacom</Company>
+    <Copyright>Copyright (c) $(Authors)</Copyright>
+    <Trademark />
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/Tenacom/Buildvana.Cake</PackageProjectUrl>
+    <PackageReleaseNotes>See $(PackageProjectUrl)/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/Tenacom/Buildvana.Cake</RepositoryUrl>
+    <IconInPackage>true</IconInPackage>
+    <ReadmeFileInPackage>true</ReadmeFileInPackage>
+    <LicenseFileInPackage>true</LicenseFileInPackage>
+    <ThirdPartyNoticeInPackage>true</ThirdPartyNoticeInPackage>
+  </PropertyGroup>
+
+  <!-- Common build options -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>false</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CLSCompliant>true</CLSCompliant>
+    <ComVisible>false</ComVisible>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <!-- Solution-wide build options -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <XmlDocs>false</XmlDocs> <!--Do not generate XML documentation -->
+    <UsePublicApiAnalyzers>false</UsePublicApiAnalyzers>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Run-time dependencies -->
+  <ItemGroup>
+  </ItemGroup>
+
+  <!-- Development dependencies -->
+  <ItemGroup>
+  </ItemGroup>
+
+</Project>

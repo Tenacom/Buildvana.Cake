@@ -1,0 +1,32 @@
+# Build artifacts
+artifacts/
+
+# Local build logs
+logs/
+
+# Cake build
+tools/
+
+# Testing
+**/TestResults/
+
+# Visual Studio
+**/bin/
+**/obj/
+**/.vs/
+*.csproj.user
+*.pubxml.user
+
+# ReSharper
+*.DotSettings.user
+_ReSharper.*/
+
+# Windows thumbnails
+Thumbs.db
+
+# DocFx
+docs/globalMetadata.json
+docs/api/.manifest
+docs/api/*.yml
+docs/obj/
+docs/_site/
