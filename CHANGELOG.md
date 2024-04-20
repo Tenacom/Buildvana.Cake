@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased changes
 
-Initial release, based on scripts already in use at Tenacom.
-
 ### New features
 
 ### Changes to existing features
@@ -16,3 +14,7 @@ Initial release, based on scripts already in use at Tenacom.
 ### Bugs fixed in this release
 
 ### Known problems introduced by this release
+
+## [1.0.4-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.4-preview) (2024-04-20)
+
+Initial release, based on scripts already in use at Tenacom.
