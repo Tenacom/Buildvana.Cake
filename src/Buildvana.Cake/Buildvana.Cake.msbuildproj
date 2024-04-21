@@ -11,6 +11,8 @@
   <!-- Package properties -->
   <PropertyGroup>
     <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Remove the <dependencies> tag from .nupkg, because it makes the package "depend" on our TargetPlatform. -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <!-- Warning suppressions -->
