@@ -5,22 +5,6 @@
 
 using NuGet.Versioning;
 
-// ---------------------------------------------------------------------------------------------
-// CIPlatform: Continuous Integration platform under which the script runs
-// ---------------------------------------------------------------------------------------------
-
-enum CIPlatform
-{
-    None,
-    GitHub,
-    GitLab,
-    Unsupported,
-}
-
-// ---------------------------------------------------------------------------------------------
-// BuildData: a record to hold build configuration data
-// ---------------------------------------------------------------------------------------------
-
 /*
  * Summary : Holds configuration data for the build.
  */

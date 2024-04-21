@@ -10,42 +10,6 @@ using SysDirectory = System.IO.Directory;
 using SysFile = System.IO.File;
 using SysPath = System.IO.Path;
 
-Task("Default")
-    .Description("Default task - Do nothing (but log build configuration data)")
-    .Does(context => {
-        context.Information("The default task does nothing. This is intentional.");
-        context.Information("Use `dotnet cake --description` to see the list of available tasks.");
-    });
-
-Task("CleanAll")
-    .Description("Delete all output directories, VS data, R# caches")
-    .Does<BuildData>((context, data) => context.CleanAll(data));
-
-Task("LocalCleanAll")
-    .Description("Like CleanAll, but only runs on a local machine")
-    .WithCriteria<BuildData>(data => data.CIPlatform is CIPlatform.None)
-    .Does<BuildData>((context, data) => context.CleanAll(data));
-
-Task("Restore")
-    .Description("Restores dependencies")
-    .IsDependentOn("LocalCleanAll")
-    .Does<BuildData>((context, data) => context.RestoreSolution(data));
-
-Task("Build")
-    .Description("Build all projects")
-    .IsDependentOn("Restore")
-    .Does<BuildData>((context, data) => context.BuildSolution(data, false));
-
-Task("Test")
-    .Description("Build all projects and run tests")
-    .IsDependentOn("Build")
-    .Does<BuildData>((context, data) => context.TestSolution(data, false, false, true));
-
-Task("Pack")
-    .Description("Build all projects, run tests, and prepare build artifacts")
-    .IsDependentOn("Test")
-    .Does<BuildData>((context, data) => context.PackSolution(data, false, false));
-
 Task("Release")
     .Description("Publish a new public release (CI only)")
     .Does<BuildData>(async (context, data) => {
