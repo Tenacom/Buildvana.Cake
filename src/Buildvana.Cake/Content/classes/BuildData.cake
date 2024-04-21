@@ -28,7 +28,6 @@ sealed class BuildData
                 || context.HasEnvironmentVariable("JENKINS_URL")
                 ? CIPlatform.Unsupported : CIPlatform.None;
 
-        context.Ensure(ciPlatform is CIPlatform.None or CIPlatform.GitHub or CIPlatform.GitLab, 255, "Running under an unsupported CI");
         context.Ensure(context.TryGetRepositoryInfo(out var repository), 255, "Cannot determine repository owner and name.");
         var solutionPath = context.GetFiles("*.sln").FirstOrDefault() ?? context.Fail<FilePath>(255, "Cannot find a solution file.");
         var solution = context.ParseSolution(solutionPath);
@@ -47,6 +46,7 @@ sealed class BuildData
         (LatestVersion, LatestStableVersion) = context.GitGetLatestVersions();
 
         CIPlatform = ciPlatform;
+        CIAdapter = CIAdapter.Create(context, this, ciPlatform);
         RepositoryHostUrl = repository.HostUrl;
         RepositoryOwner = repository.Owner;
         RepositoryName = repository.Name;
@@ -82,6 +82,11 @@ sealed class BuildData
      * Summary : Gets a value indicating under which CI platform (if any) the script runs
      */
     public CIPlatform CIPlatform { get; }
+
+    /*
+     * Summary : Gets a Continuous Integration adapter for the current CI platform
+     */
+    public CIAdapter CIAdapter { get; }
 
     /*
      * Summary : Gets the repository host URL (e.g. "https://github.com" for a repository hosted on GitHub.)
