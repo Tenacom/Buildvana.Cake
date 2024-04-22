@@ -10,18 +10,26 @@ using SysDirectory = System.IO.Directory;
 using SysFile = System.IO.File;
 using SysPath = System.IO.Path;
 
-Task("CleanAll")
-    .Description("Delete all output directories, VS data, R# caches")
-    .Does<BuildData>((context, data) => context.CleanAll(data));
-
-Task("LocalCleanAll")
-    .Description("Like CleanAll, but only runs on a local machine")
-    .WithCriteria<BuildData>(data => data.CIPlatform is CIPlatform.None)
-    .Does<BuildData>((context, data) => context.CleanAll(data));
+Task("Prepare")
+    .Description("Prepare workspace: delete all output directories, VS data, R# caches")
+    .Does<BuildData>((context, data) =>
+    {
+        context.DeleteDirectoryIfExists(".vs");
+        context.DeleteDirectoryIfExists("_ReSharper.Caches");
+        context.DeleteDirectoryIfExists("artifacts");
+        context.DeleteDirectoryIfExists("logs");
+        foreach (var project in data.Solution.Projects)
+        {
+            var projectDirectory = project.Path.GetDirectory();
+            context.DeleteDirectoryIfExists(projectDirectory.Combine("bin"));
+            context.DeleteDirectoryIfExists(projectDirectory.Combine("obj"));
+            context.DeleteDirectoryIfExists(projectDirectory.Combine("TestResults"));
+        }
+    });
 
 Task("Restore")
     .Description("Restore dependencies")
-    .IsDependentOn("LocalCleanAll")
+    .IsDependentOn("Prepare")
     .Does<BuildData>((context, data) => context.RestoreSolution(data));
 
 Task("Build")
