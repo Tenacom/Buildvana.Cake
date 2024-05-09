@@ -4,8 +4,9 @@
 #nullable enable
 
 Task("Default")
-    .Description("Default task - Do nothing (but log build configuration data)")
-    .Does(context => {
+    .Description("Default task - Do nothing")
+    .Does(() => {
+        var context = GetService<ICakeContext>();
         context.Information("The default task does nothing. This is intentional.");
         context.Information("Use `dotnet cake --description` to see the list of available tasks.");
     });

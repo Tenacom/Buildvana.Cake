@@ -1,0 +1,87 @@
+// Copyright (C) Tenacom and contributors. Licensed under the MIT license.
+// See LICENSE file in the project root for full license information.
+
+#nullable enable
+
+/*
+ * Summary : ServerRelease implementation for GitHub
+ */
+sealed class GitHubServerRelease : ServerRelease
+{
+    private readonly GitHubServerAdapter _server;
+    private readonly ICakeContext _context;
+    private readonly VersionService _version;
+    private readonly GitService _git;
+    private readonly Release _gitHubRelease;
+
+    private bool _gitHubReleaseDeleted;
+
+    private GitHubServerRelease(GitHubServerAdapter server, IServiceProvider services, Release gitHubRelease)
+        : base(services)
+    {
+        Guard.IsNotNull(server);
+        Guard.IsNotNull(services);
+        Guard.IsNotNull(gitHubRelease);
+
+        _server = server;
+        _context = services.GetRequiredService<ICakeContext>();
+        _version = services.GetRequiredService<VersionService>();
+        _git = services.GetRequiredService<GitService>();
+        _gitHubRelease = gitHubRelease;
+
+        OnRollback(async () =>
+        {
+            // Do this only if the release has not been previously deleted by rolling back its publication
+            if (!_gitHubReleaseDeleted)
+            {
+                await _server.DeleteReleaseAsync(_gitHubRelease, null);
+            }
+        });
+    }
+
+    public static async Task<GitHubServerRelease> CreateAsync(GitHubServerAdapter server, IServiceProvider services, Func<Task<Release>> createGitHubReleaseAsync)
+    {
+        Guard.IsNotNull(server);
+        Guard.IsNotNull(services);
+        Guard.IsNotNull(createGitHubReleaseAsync);
+
+        var gitHubRelease = await createGitHubReleaseAsync().ConfigureAwait(false);
+        return new(server, services, gitHubRelease);
+    }
+
+    protected override async Task DoPublishAsync(IReadOnlyList<AssetData> assets)
+    {
+        var assetCount = assets.Count;
+        if (assetCount > 0)
+        {
+            var i = 0;
+            foreach (var asset in assets)
+            {
+                i++;
+                _context.Information($"Uploading asset {i} of {assetCount}: {SysPath.GetFileName(asset.Path)} ({asset.Description})...");
+                await _server.UploadReleaseAssetAsync(_gitHubRelease, asset.Path, asset.MimeType, asset.Description).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            _context.Information("Asset upload skipped: no release assets defined.");
+        }
+
+        await _server.PublishReleaseAsync(_gitHubRelease).ConfigureAwait(false);
+    }
+
+    protected override async Task UndoPublishAsync()
+    {
+        // Delete the release and the created tag
+        await _server.DeleteReleaseAsync(_gitHubRelease, _version.CurrentStr);
+
+        // Prevent the last rollback action from trying to delete the release again
+        _gitHubReleaseDeleted = true;
+    }
+
+    protected override Task OnPublishedAsync()
+    {
+        _server.SetActionsStepOutput("version", _version.CurrentStr);
+        return SysTask.CompletedTask;
+    }
+}

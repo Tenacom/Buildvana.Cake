@@ -3,49 +3,56 @@
 
 #nullable enable
 
-// ---------------------------------------------------------------------------------------------
-// Changelog management helpers
-// ---------------------------------------------------------------------------------------------
-
-using System.Globalization;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-
-using SysFile = System.IO.File;
-
-sealed class Changelog
+/// <summary>
+/// Manages the repository's changelog in Markdown format, according to the <see href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</see> specification.
+/// </summary>
+sealed class ChangelogService
 {
+    /// <summary>
+    /// The name of the changelog file.
+    /// </summary>
     public const string FileName = "CHANGELOG.md";
 
     private readonly ICakeContext _context;
-    private readonly BuildData _data;
+    private readonly ServerAdapter _server;
+    private readonly VersionService _version;
 
-    /*
-    * Summary : Initializes a new instance of class Changelog.
-    * Params  : context - The Cake context.
-    */
-    public Changelog(ICakeContext context, BuildData data)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Changelog"/> class.
+    /// </summary>
+    public ChangelogService(ICakeContext context, ServerAdapter server, VersionService version)
     {
+        Guard.IsNotNull(context);
+        Guard.IsNotNull(server);
+        Guard.IsNotNull(version);
         _context = context;
-        _data = data;
+        _server = server;
+        _version = version;
         Path = new FilePath(FileName);
         FullPath = Path.FullPath;
         Exists = SysFile.Exists(FullPath);
     }
 
+    /// <summary>
+    /// Gets the path to the changelog file.
+    /// </summary>
     public FilePath Path { get; }
 
+    /// <summary>
+    /// Gets the full path to the changelog file as a string.
+    /// </summary>
     public string FullPath { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether the changelog file exists.
+    /// </summary>
     public bool Exists { get; }
 
-    /*
-    * Summary : Checks the changelog for contents in the "Unreleased changes" section.
-    * Params  : (none)
-    * Returns : If there are any contents (excluding blank lines and sub-section headings)
-    *           in the "Unreleased changes" section, true; otherwise, false.
-    */
+    /// <summary>
+    /// Checks the changelog for contents in the "Unreleased changes" section.
+    /// </summary>
+    /// <returns>If there are any contents (excluding blank lines and sub-section headings)
+    /// in the "Unreleased changes" section, <see langword="true"/>; otherwise, <see langword="false"/>.</returns>
     public bool HasUnreleasedChanges()
     {
         if (!Exists)
@@ -63,7 +70,7 @@ sealed class Changelog
                 line = reader.ReadLine();
             } while (line != null && !sectionHeadingRegex.IsMatch(line));
 
-            Ensure(_context, line != null, $"{FileName} contains no sections.");
+            _context.Ensure(line != null, $"{FileName} contains no sections.");
             for (; ;)
             {
                 line = reader.ReadLine();
@@ -82,11 +89,10 @@ sealed class Changelog
         return false;
     }
 
-    /*
-    * Summary : Prepares the changelog for a release by moving the contents of the "Unreleased changes" section
-    *           to a new section.
-    * Params  : (none)
-    */
+    /// <summary>
+    /// Prepares the changelog for a new release by moving the contents of the "Unreleased changes" section
+    /// to a new section.
+    /// </summary>
     public void PrepareForRelease()
     {
         _context.Information("Updating changelog...");
@@ -115,7 +121,7 @@ sealed class Changelog
                 switch (state)
                 {
                     case ReadingFileHeader:
-                        Ensure(_context, line != null, $"{FileName} contains no sections.");
+                        _context.Ensure(line != null, $"{FileName} contains no sections.");
 
                         // Copy everything up to an including the first section heading (which we assume is "Unreleased changes")
                         writer.WriteLine(line);
@@ -163,7 +169,7 @@ sealed class Changelog
                         writer.WriteLine(line);
                         break;
                     default:
-                        Fail(_context, $"Internal error: reading state corrupted ({state}).");
+                        _context.Fail($"Internal error: reading state corrupted ({state}).");
                         throw null;
                 }
             }
@@ -220,11 +226,10 @@ sealed class Changelog
         SysFile.WriteAllText(FullPath, sb.ToString(), encoding);
     }
 
-    /*
-    * Summary : Updates the heading of the first section of the changelog after the "Unreleased changes" section
-    *           to reflect a change in the released version.
-    * Params  : (none)
-    */
+    /// <summary>
+    /// Updates the heading of the first section of the changelog after the "Unreleased changes" section
+    /// to reflect a change in the released version.
+    /// </summary>
     public void UpdateNewSectionTitle()
     {
         _context.Information("Updating changelog's new release section title...");
@@ -249,7 +254,7 @@ sealed class Changelog
                 switch (state)
                 {
                     case ReadingFileHeader:
-                        Ensure(_context, line != null, $"{FileName} contains no sections.");
+                        _context.Ensure(line != null, $"{FileName} contains no sections.");
                         writer.WriteLine(line);
                         if (sectionHeadingRegex.IsMatch(line))
                         {
@@ -258,7 +263,7 @@ sealed class Changelog
 
                         break;
                     case ReadingUnreleasedChangesSection:
-                        Ensure(_context, line != null, $"{FileName} contains only one section.");
+                        _context.Ensure(line != null, $"{FileName} contains only one section.");
                         if (sectionHeadingRegex.IsMatch(line))
                         {
                             // Replace header of second section
@@ -279,7 +284,7 @@ sealed class Changelog
                         writer.WriteLine(line);
                         break;
                     default:
-                        Fail(_context, $"Internal error: reading state corrupted ({state}).");
+                        _context.Fail($"Internal error: reading state corrupted ({state}).");
                         throw null;
                 }
             }
@@ -289,7 +294,5 @@ sealed class Changelog
     }
 
     private string MakeSectionTitle()
-    {
-        return $"[{_data.VersionStr}](https://github.com/{_data.RepositoryOwner}/{_data.RepositoryName}/releases/tag/{_data.VersionStr}) ({DateTime.Now:yyyy-MM-dd})";
-    }
+        => $"[{_version.CurrentStr}]({_server.GetReleaseUrl(_version.CurrentStr)}) ({DateTime.Now:yyyy-MM-dd})";
 }

@@ -3,13 +3,7 @@
 
 #nullable enable
 
-/*
- * Summary: Continuous Integration platform under which the script runs
- */
-enum CIPlatform
+partial class ServerRelease
 {
-    None,
-    GitHub,
-    GitLab,
-    Unsupported,
+    protected record AssetData(string Path, string Description, string MimeType);
 }
