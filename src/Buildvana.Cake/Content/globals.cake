@@ -40,6 +40,7 @@ static class Global
             .AddSingleton<VersionService>()
             .AddSingleton<DotNetService>()
             .AddSingleton<DocFXService>()
+            .AddSingleton<ChangelogService>()
             .AddSingleton(x => ServerAdapter.Create(x))
             .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
