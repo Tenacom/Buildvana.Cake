@@ -33,15 +33,15 @@ static class Global
         Guard.IsNotNull(context);
         _services = new ServiceCollection()
             .AddSingleton<ICakeContext>(context)
-            .AddSingleton<PathsService>()
-            .AddSingleton<OptionsService>()
             .AddSingleton<GitService>()
             .AddSingleton<PublicApiFilesService>()
-            .AddSingleton<VersionService>()
-            .AddSingleton<DotNetService>()
-            .AddSingleton<DocFXService>()
-            .AddSingleton<ChangelogService>()
             .AddSingleton(x => ServerAdapter.Create(x))
+            .AddSingleton<VersionService>()
+            .AddSingleton<ChangelogService>()
+            .AddSingleton<DocFXService>()
+            .AddSingleton<DotNetService>()
+            .AddSingleton<OptionsService>()
+            .AddSingleton<PathsService>()
             .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
         if (_initialOptions is not null)
