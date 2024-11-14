@@ -35,7 +35,7 @@ jobs:
         dotnet cake --target Pack --verbosity %CAKE_VERBOSITY%
     - name: Upload coverage to Codecov
       if: hashFiles('temp/Cobertura.xml') != ''
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         working-directory: ./temp/
         files: Cobertura.xml
