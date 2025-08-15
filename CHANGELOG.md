@@ -11,11 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changes to existing features
 
-- When a version specification change is applied by the `Release` task, the old version spec is now logged together with the new one.
-
 ### Bugs fixed in this release
 
 ### Known problems introduced by this release
+
+## [1.0.23-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.23-preview) (2025-08-15)
+
+### Changes to existing features
+
+- When a version specification change is applied by the `Release` task, the old version spec is now logged together with the new one.
 
 ## [1.0.16-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.16-preview) (2024-05-10)
 
