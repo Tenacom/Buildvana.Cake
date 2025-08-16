@@ -13,9 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bugs fixed in this release
 
+- A compilation error in Release.cake due to an unfinished change was fixed.
+
 ### Known problems introduced by this release
 
-## [1.0.23-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.23-preview) (2025-08-15)
+## [1.0.23-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.23-preview) (2025-08-15) (DEPRECATED)
 
 ### Changes to existing features
 
@@ -32,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New features
 
-- Work has begun to support CI systems other than GitHub, although GitHub is for now the only one actually supported.
+- Work has begun to support CI systems other than GitHub, although GitHub is the only one actually supported for now.
 
 ### Changes to existing features
 
