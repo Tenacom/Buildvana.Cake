@@ -1,4 +1,4 @@
-// Copyright (C) Tenacom and contributors. Licensed under the MIT license.
+﻿// Copyright (C) Tenacom and contributors. Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
 #nullable enable
@@ -78,17 +78,7 @@ sealed class VersionFile
     /// </remarks>
     public bool ApplyVersionSpecChange(VersionSpecChange change)
     {
-        var previousVersionSpec = VersionSpec;
         (VersionSpec, var changed) = VersionSpec.ApplyChange(change, FirstUnstableTag);
-        if (changed)
-        {
-            _context.Information($"Version spec changed from {previousVersionSpec} to {VersionSpec}.");
-        }
-        else
-        {
-            _context.Information("Version spec not changed.");
-        }
-
         return changed;
     }
 
