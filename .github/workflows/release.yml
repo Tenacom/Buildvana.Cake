@@ -78,7 +78,7 @@ jobs:
         echo Check changelog before update : %CHECK_CHANGELOG%
         echo Cake verbosity                : %CAKE_VERBOSITY%
     - name: Checkout repository with full history
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0 # Checkout with full history so nbgv can compute Git height correctly.
         token: ${{ secrets.RELEASE_TOKEN }}
@@ -98,9 +98,10 @@ jobs:
         if [%RUNNER_DEBUG%]==[1] set CAKE_VERBOSITY=Diagnostic
         dotnet cake --target Release --verbosity %CAKE_VERBOSITY%
     - name: Upload coverage to Codecov
+      if: ${{ hashFiles('TestResults/Cobertura.xml') != '' }}
       uses: codecov/codecov-action@v5
       with:
-        working-directory: ./TestResults/
+        working-directory: TestResults
         files: Cobertura.xml
         name: v${{ steps.build.outputs.version }}
         verbose: true
