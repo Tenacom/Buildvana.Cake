@@ -40,7 +40,8 @@ Task("Release")
             if (versionSpecChange != VersionSpecChange.None)
             {
                 var versionFile = VersionFile.Load(context);
-                if (versionFile.ApplyVersionSpecChange(versionSpecChange, out var previousVersionSpec))
+                var previousVersionSpec = versionFile.VersionSpec;
+                if (versionFile.ApplyVersionSpecChange(versionSpecChange))
                 {
                     context.Information($"Version spec changed from {previousVersionSpec} to {versionFile.VersionSpec}.");
                     versionFile.Save();
