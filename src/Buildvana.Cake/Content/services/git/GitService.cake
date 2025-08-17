@@ -215,30 +215,33 @@ sealed class GitService
     private bool TryGetOriginUrl([MaybeNullWhen(false)] out string url)
     {
         url = null!;
-        bool first = true;
+        string? originUrl = null;
+        string? onlyRemoteUrl = null;
+        bool isFirst = true;
         foreach (var remote in _repository.Network.Remotes)
         {
             using (remote)
             {
                 if (remote.Name == "origin")
                 {
-                    url = remote.Url;
+                    originUrl = remote.Url;
                     break;
                 }
-                else if (first)
+
+                if (isFirst)
                 {
-                    url = remote.Url;
+                    onlyRemoteUrl = remote.Url;
+                    isFirst = false;
                 }
                 else
                 {
-                    // Fail if there is more than one remote and no one of them is called "origin"
-                    url = null;
+                    onlyRemoteUrl = null;
                 }
             }
-
-            first = false;
         }
 
+        // URL of "origin" if present; otherwise, URL of the _only_ remote.
+        url = originUrl ?? onlyRemoteUrl;
         if (url is null)
         {
             return false;
