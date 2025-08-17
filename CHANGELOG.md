@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bugs fixed in this release
 
+- Script setup might fail if the configured remote was not "origin".
+
 ### Known problems introduced by this release
 
 ## [1.0.29-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.29-preview) (2025-08-17)
