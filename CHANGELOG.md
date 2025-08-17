@@ -9,16 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New features
 
+### Changes to existing features
+
+### Bugs fixed in this release
+
+### Known problems introduced by this release
+
+## [1.0.36-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.36-preview) (2025-08-17)
+
+### New features
+
 - New property `GitService.Origin` holds the name of the origin remote.
 
 ### Changes to existing features
 
 - The value for property `GitService.MainBranch` is now looked for among branch names for the origin remote (property `GitService.Origin`). Previously it was looked for among local branch names.
 - Property `GitService.MainBranch` will now be an empty string if a suitable "main" branch is not found on the origin remote. Previously the constructor of `GitService` would throw if no valid value was found for `MainBranch`.
-
-### Bugs fixed in this release
-
-### Known problems introduced by this release
 
 ## [1.0.33-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.33-preview) (2025-08-17)
 
