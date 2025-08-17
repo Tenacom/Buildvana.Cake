@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bugs fixed in this release
 
-- A compilation error in Release.cake due to an unfinished change was fixed.
-
 ### Known problems introduced by this release
+
+## [1.0.29-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.29-preview) (2025-08-17)
+
+### Bugs fixed in this release
+
+- A compilation error in Release.cake due to an unfinished change was fixed.
 
 ## [1.0.23-preview](https://github.com/Tenacom/Buildvana.Cake/releases/tag/1.0.23-preview) (2025-08-15) (DEPRECATED)
 
