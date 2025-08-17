@@ -19,27 +19,22 @@ sealed class GitService
         var workingDirectory = context.Environment.WorkingDirectory.FullPath;
         _context.Ensure(LibGit2Sharp.Repository.IsValid(workingDirectory), $"There is no Git repository at {workingDirectory}");
         _repository = new LibGit2Sharp.Repository(workingDirectory);
-        _context.Ensure(TryGetOriginUrl(out var originUrl), "No origin URL found in the Git repository.");
+        _context.Ensure(TryGetOriginInfo(out var origin, out var originUrl), "No origin remote found in the Git repository.");
+        Origin = origin;
         OriginUrl = originUrl;
         var headName = _repository.Head.CanonicalName;
         CurrentBranch = headName.StartsWith("refs/heads/", StringComparison.Ordinal) ? _repository.Head.FriendlyName : string.Empty;
         var configuredMainBranch = options.GetOption<string>("mainBranch", string.Empty);
-        if (TryGetMainBranch(configuredMainBranch, out var mainBranch))
-        {
-            MainBranch = mainBranch;
-        }
-        else if (string.IsNullOrEmpty(configuredMainBranch))
-        {
-            _context.Fail("Could not find a 'main' or 'master' branch in the repository.");
-        }
-        else
-        {
-            _context.Fail($"Could not find the configured main branch ('{configuredMainBranch}') in the repository.");
-        }
+        MainBranch = FindMainBranch(origin, configuredMainBranch);
     }
 
     /// <summary>
-    /// Gets the fetch URL of the origin remote, i.e. either the remote whose name is "origin", or the only remote if there is only one, even if its name is not "origin".
+    /// Gets the name of the origin remote, i.e. either "origin" if such remote exists, or the name of the only remote if there is only one.
+    /// </summary>
+    public string Origin { get; }
+
+    /// <summary>
+    /// Gets the fetch URL of the origin remote.
     /// </summary>
     public string OriginUrl { get; }
 
@@ -184,38 +179,48 @@ sealed class GitService
         }
     }
 
-    private bool TryGetOriginUrl([MaybeNullWhen(false)] out string url)
+    private bool TryGetOriginInfo([MaybeNullWhen(false)] out string name, [MaybeNullWhen(false)] out string url)
     {
+        name = null!;
         url = null!;
+        string? originName = null;
         string? originUrl = null;
+        string? onlyRemoteName = null;
         string? onlyRemoteUrl = null;
         bool isFirst = true;
+        _context.Verbose("Git: looking for origin remote...");
         foreach (var remote in _repository.Network.Remotes)
         {
             using (remote)
             {
+                _context.Verbose($"Git:     '{remote.Name}' ({remote.Url})");
                 if (remote.Name == "origin")
                 {
+                    originName = remote.Name;
                     originUrl = remote.Url;
                     break;
                 }
 
                 if (isFirst)
                 {
+                    onlyRemoteName = remote.Name;
                     onlyRemoteUrl = remote.Url;
                     isFirst = false;
                 }
                 else
                 {
+                    onlyRemoteName = null;
                     onlyRemoteUrl = null;
                 }
             }
         }
 
-        // URL of "origin" if present; otherwise, URL of the _only_ remote.
+        // Name and URL of "origin" if present; otherwise, name and URL of the _only_ remote.
+        name = originName ?? onlyRemoteName;
         url = originUrl ?? onlyRemoteUrl;
-        if (url is null)
+        if (name is null || url is null)
         {
+            _context.Verbose("Git: origin remote not found.");
             return false;
         }
 
@@ -226,65 +231,61 @@ sealed class GitService
             url = url[..(url.Length - 4)];
         }
 
+        _context.Verbose($"Git: origin remote is '{name}' ({url})");
         return true;
     }
 
-    private bool TryGetMainBranch(string configuredMainBranch, [MaybeNullWhen(false)] out string mainBranch)
+    private string FindMainBranch(string origin, string configuredMainBranch)
     {
-        mainBranch = null!;
         var haveConfiguredMainBranch = !string.IsNullOrEmpty(configuredMainBranch);
         var mainBranchFound = false;
         var mainFound = false;
         var masterFound = false;
+        var mainValue = $"{origin}/main";
+        var masterValue = $"{origin}/master";
+        var configuredValue = string.Empty;
         if (haveConfiguredMainBranch)
         {
-            _context.Verbose($"Looking for main branch (configured value is '{configuredMainBranch}')...");
+            _context.Verbose($"Git: looking for main branch on remote '{origin}' (configured value is '{configuredMainBranch}')...");
+            configuredValue = $"{origin}/{configuredMainBranch}";
         }
         else
         {
-            _context.Verbose($"Looking for main branch (no configured value)...");
+            _context.Verbose($"Git: looking for main branch on remote '{origin}' (no configured value)...");
         }
-        foreach (var branch in _repository.Branches.Where(static x => !x.IsRemote).Select(static x => x.FriendlyName))
+        foreach (var branch in _repository.Branches.Select(static x => x.FriendlyName))
         {
-            if (haveConfiguredMainBranch && branch == configuredMainBranch)
+            if (haveConfiguredMainBranch && branch == configuredValue)
             {
-                _context.Verbose($"    Found local branch '{branch}' <-- configured value");
+                _context.Verbose($"Git:     '{branch}' <-- configured value");
                 mainBranchFound = true;
             }
             else
             {
-                _context.Verbose($"    Found local branch '{branch}'");
-                if (branch == "main")
+                _context.Verbose($"Git:     '{branch}'");
+                if (branch == mainValue)
                 {
                     mainFound = true;
                 }
-                else if (branch == "master")
+                else if (branch == masterValue)
                 {
                     masterFound = true;
                 }
             }
         }
 
-        if (mainBranchFound)
-        {
-            mainBranch = configuredMainBranch;
-        }
-        else if (mainFound)
-        {
-            mainBranch = "main";
-        }
-        else if (masterFound)
-        {
-            mainBranch = "master";
-        }
+        var mainBranch = mainBranchFound ? configuredMainBranch
+            : mainFound ? "main"
+            : masterFound ? "master"
+            : null;
 
         if (mainBranch is null)
         {
-            _context.Verbose("Main branch NOT found!");
-            return false;
+            _context.Verbose("Git: main branch not found on remote '{origin}'.");
+            return string.Empty;
         }
 
-        _context.Verbose($"Main branch '{mainBranch}' found.");
-        return true;
+        _context.Verbose($"Git: main branch '{mainBranch}' found on remote '{origin}'.");
+        return mainBranch;
     }
 }
