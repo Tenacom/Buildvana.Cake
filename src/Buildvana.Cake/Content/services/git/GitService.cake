@@ -1,4 +1,4 @@
-// Copyright (C) Tenacom and contributors. Licensed under the MIT license.
+﻿// Copyright (C) Tenacom and contributors. Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
 #nullable enable
@@ -23,46 +23,18 @@ sealed class GitService
         OriginUrl = originUrl;
         var headName = _repository.Head.CanonicalName;
         CurrentBranch = headName.StartsWith("refs/heads/", StringComparison.Ordinal) ? _repository.Head.FriendlyName : string.Empty;
-        var mainBranch = options.GetOption<string>("mainBranch", string.Empty);
-        var mainBranchFound = false;
-        var mainFound = false;
-        var masterFound = false;
-        foreach (var branch in _repository.Branches.Select(static x => x.FriendlyName))
-        {
-            if (branch == mainBranch)
-            {
-                mainBranchFound = true;
-                break;
-            }
-            else if (branch == "main")
-            {
-                mainFound = true;
-            }
-            else if (branch == "master")
-            {
-                masterFound = true;
-            }
-        }
-
-        if (mainBranchFound)
+        var configuredMainBranch = options.GetOption<string>("mainBranch", string.Empty);
+        if (TryGetMainBranch(configuredMainBranch, out var mainBranch))
         {
             MainBranch = mainBranch;
         }
-        else if (mainFound)
-        {
-            MainBranch = "main";
-        }
-        else if (masterFound)
-        {
-            MainBranch = "master";
-        }
-        else if (string.IsNullOrEmpty(mainBranch))
+        else if (string.IsNullOrEmpty(configuredMainBranch))
         {
             _context.Fail("Could not find a 'main' or 'master' branch in the repository.");
         }
         else
         {
-            _context.Fail($"Could not find the configured main branch ('{mainBranch}') in the repository.");
+            _context.Fail($"Could not find the configured main branch ('{configuredMainBranch}') in the repository.");
         }
     }
 
@@ -254,6 +226,65 @@ sealed class GitService
             url = url[..(url.Length - 4)];
         }
 
+        return true;
+    }
+
+    private bool TryGetMainBranch(string configuredMainBranch, [MaybeNullWhen(false)] out string mainBranch)
+    {
+        mainBranch = null!;
+        var haveConfiguredMainBranch = !string.IsNullOrEmpty(configuredMainBranch);
+        var mainBranchFound = false;
+        var mainFound = false;
+        var masterFound = false;
+        if (haveConfiguredMainBranch)
+        {
+            _context.Verbose($"Looking for main branch (configured value is '{configuredMainBranch}')...");
+        }
+        else
+        {
+            _context.Verbose($"Looking for main branch (no configured value)...");
+        }
+        foreach (var branch in _repository.Branches.Where(static x => !x.IsRemote).Select(static x => x.FriendlyName))
+        {
+            if (haveConfiguredMainBranch && branch == configuredMainBranch)
+            {
+                _context.Verbose($"    Found local branch '{branch}' <-- configured value");
+                mainBranchFound = true;
+            }
+            else
+            {
+                _context.Verbose($"    Found local branch '{branch}'");
+                if (branch == "main")
+                {
+                    mainFound = true;
+                }
+                else if (branch == "master")
+                {
+                    masterFound = true;
+                }
+            }
+        }
+
+        if (mainBranchFound)
+        {
+            mainBranch = configuredMainBranch;
+        }
+        else if (mainFound)
+        {
+            mainBranch = "main";
+        }
+        else if (masterFound)
+        {
+            mainBranch = "master";
+        }
+
+        if (mainBranch is null)
+        {
+            _context.Verbose("Main branch NOT found!");
+            return false;
+        }
+
+        _context.Verbose($"Main branch '{mainBranch}' found.");
         return true;
     }
 }
